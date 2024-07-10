@@ -1,0 +1,48 @@
+public class handlerTravalApproval {
+//----------------------------Start_End_Date---------------------------------------------------
+      public static boolean startEndDate(Travel_Approval__c TApproval){
+          
+          /*if(TApproval.Trip_Start_Date__c=='' ||  TApproval.Trip_End_date__c==''){
+              TApproval.addError('Date Field cannot be Empty');
+          } */
+            Travel_Approval__c TA=new Travel_Approval__c();   
+         
+           try{   // Use a list to avoid the System.queryException.
+             TA=[select id,Trip_Start_Date__c,Trip_End_date__c from Travel_Approval__c where
+                Trip_Start_Date__c= :TApproval.trip_start_date__c and ownerId = :TApproval.OwnerId limit 1];
+            }
+            catch(exception e){
+            System.debug(e.getMessage());
+            TA=null;
+        	}
+          
+            if(TA!=null && TApproval.id==null){ //While Insert Record
+                TApproval.addError('Employee can\'t have more than one travel at one day');
+                return false;
+             }
+        
+            if(TA!=null && TApproval.id!=null && TApproval.id!=TA.id){	//While Updating the record
+                TApproval.addError('Employee can\'t have more than one travel at one day');
+                return false;
+            } 
+        return true;
+     }
+
+//----------------------------Date_Range------------------------------------------------------------------------------------
+   public static void dateRange(Travel_Approval__c TApproval){
+            Travel_Approval__c TA = new Travel_Approval__c();
+       
+            try{ 
+            TA=[select id,Trip_Start_Date__c,Trip_End_Date__c from Travel_Approval__c where  ((Trip_End_Date__c > :TApproval.Trip_End_date__c and Trip_Start_date__c < :TApproval.Trip_End_date__c) 
+                 or (Trip_Start_Date__c < :TApproval.Trip_Start_date__c and Trip_End_Date__c > :TApproval.Trip_Start_date__c)) and (ownerId = :TApproval.OwnerId) limit 1];
+            }
+            catch(exception e){
+            System.debug(e.getMessage());
+            TA=null;
+        	}
+            if(TA!=null && TApproval.id==null &&  TApproval.Trip_Start_Date__c < TA.Trip_End_Date__c &&  TApproval.Trip_Start_Date__c > TA.Trip_Start_Date__c ){ //While Insert Record
+            TApproval.addError('Employee is already having active travel');
+            }
+            if(TA!=null && TApproval.id!=null && TApproval.id!=TA.id &&  TApproval.Trip_Start_Date__c < TA.Trip_End_Date__c &&  TApproval.Trip_Start_Date__c > TA.Trip_Start_Date__c){	//While Updating the record
+            TApproval.addError('Employee is already having active travel');
+            } } }
