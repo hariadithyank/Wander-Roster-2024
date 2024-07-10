@@ -1,0 +1,70 @@
+.html 
+<template> 
+    <lightning-card title="Wander Often, Wonder Always!!" icon-name="utility:plane"> 
+        <div class="text" style={dynamicTextStyle}>{dynamicText}</div> 
+        <div class="marquee-container"> 
+        <p class="marquee">Remember That Happiness is a Way of Travel-Not a Destination</p> 
+        </div> 
+    </lightning-card> 
+</template> 
+ 
+.js 
+import { LightningElement, track } from 'lwc'; 
+export default class DynamicTextCard extends LightningElement { 
+    @track dynamicText = 'Welcome to Wander Roster'; // Initial text 
+    dynamicTextStyle = ''; // Initial  style 
+  
+    connectedCallback() { 
+        // Change text and color every 3 seconds 
+        setInterval(() => { 
+            this.dynamicText = this.generateRandomText(); 
+            this.dynamicTextStyle = `color: ${this.generateRandomColor()}`; 
+        }, 3000); 
+    } 
+  
+    generateRandomText() { 
+        //  Generate random text 
+        const texts = ['Safe Journey!', 'Travel Through the Wander Roster', 'Have Worthy Travelling Experience', 'Thanks for the Travel Wander Roster!']; 
+        return texts[Math.floor(Math.random() * texts.length)]; 
+    } 
+  
+    generateRandomColor() { 
+        // Generate random color 
+        const colors = ['#FF5733', '#33FF57', '#5733FF', '#33FFFF']; 
+        return colors[Math.floor(Math.random() * colors.length)]; 
+    } 
+} 
+ 
+.css 
+.marquee-container { 
+  display: flex; 
+  align-items: center; 
+  background: green; 
+  overflow: auto; 
+} 
+ 
+ 
+.marquee { 
+  animation: marquee 10s linear infinite; 
+  color: white; 
+  font-size: 22px; 
+  font-weight: bold; 
+} 
+ 
+ 
+.text{ 
+  font-size: 20px; 
+  font-weight: bold; 
+  font-style: normal; 
+  text-align: center; 
+} 
+ 
+ 
+@keyframes marquee { 
+  0% { 
+    transform: translateX(100%); 
+  } 
+  100% { 
+     transform: translateX(-100%); 
+  } 
+} 
