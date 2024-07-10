@@ -1,0 +1,67 @@
+public class batchArchievalTA implements Database.Batchable<sObject>{
+    
+    list<Travel_Approval__c> TAlist=new list<Travel_Approval__c>();
+    
+    public batchArchievalTA(){ 
+        
+        Date todayDate=Date.Today()-730;
+     
+     	this.TAlist=[SELECT Id, Name, Status__c, Trip_Start_Date__c, Trip_End_date__c, State__c, Department__c,
+                Purpose_of_Trip__c, Total_Expenses__c FROM Travel_Approval__c where Trip_End_Date__c <= :todayDate];
+    }
+    
+    public list<Travel_Approval__c> start(Database.BatchableContext BC){  // Start Method
+        return TAlist;         // Return the list to the execute method
+    }
+    
+    public void execute(Database.BatchableContext BC,list<Travel_Approval__c> TAlist){ // Execute Method
+      
+        // Insert the record list into the big object and delete the Transactional data
+      
+        list<Archieved_Travel_Approval__b> ATAlist = new list<Archieved_Travel_Approval__b>();
+        list<Archieved_Expense_Item__b> AEIlist = new list<Archieved_Expense_Item__b>();
+        list<id> ids= new list<id>();
+        
+        for( Travel_Approval__c TA : TAlist){
+            Archieved_Travel_Approval__b ATA =new Archieved_Travel_Approval__b();
+            
+              ids.add(TA.id);
+            
+              ATA.Name__c      	 			= TA.Name;
+              ATA.Status__c 	 			= TA.Status__c;
+              ATA.Trip_Start_Date__c		= TA.Trip_Start_Date__c;
+              ATA.Trip_End_Date__c			= TA.Trip_End_Date__c;
+              ATA.State__c					= TA.State__c;
+              ATA.Department__c				= TA.Department__c;
+              ATA.Purpose_of_Trip__c		= TA.Purpose_of_Trip__c;
+              ATA.Total_Expenses__c			= TA.Total_Expenses__c;
+            
+              ATAlist.add(ATA);   
+        }
+        
+        list<Expense_Item__c> EXitems=[SELECT Name,Expense_Type__c,Amount__c,Travel_Approval__c from Expense_Item__c where Travel_Approval__c in :ids];
+        
+        for(Expense_Item__c EXitem : Exitems){
+            Archieved_Expense_Item__b AEI =new Archieved_Expense_Item__b();
+            AEI.Name__c			 	= EXitem.Name;
+            AEI.Amount__c			= EXitem.Amount__c;
+            AEI.Travel_Approval__c	= EXitem.Travel_Approval__c;
+            AEIlist.add(AEI);   
+        }
+        
+			if( !Test.isRunningTest() ){         
+            Database.insertImmediate(ATAlist);
+                Database.insertImmediate(AEIlist);  
+        	 
+            }
+        	          
+         	Database.delete(Exitems); //Hard Delete
+       		Database.delete(TAlist);
+ 
+    }
+    
+    public void finish(Database.BatchableContext BC){
+        // Finish Method
+        System.debug('Big Object Populated and Transactional Data Deleted...');
+    }
+}
