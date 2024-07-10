@@ -1,0 +1,63 @@
+public class actualExpenseAttachment implements Schedulable {
+   // @INVOCABLEMETHOD(label='Expense Attatchment Task')
+    
+    public void execute(SchedulableContext SC){
+        
+     //----------------------------------1st use case--------------
+     // Task for the TA owner or Employee after travel ends and the status= approved 
+        
+        list<Travel_Approval__c> TAlist = [SELECT id, ownerId, Trip_End_date__c from Travel_Approval__c 
+                                           where Trip_End_Date__c = TODAY AND Status__c='Approved'];
+        
+        list<Task> Tlist=new list<Task>();
+        for(Travel_Approval__c TA : TAlist){
+            Task T=new Task();
+            T.whatId=TA.id;
+            T.OwnerId=TA.ownerId;
+            T.Priority ='High';
+            T.ActivityDate =TA.Trip_End_date__c+3;
+            T.Subject='Actual Expenses Attachment';
+            T.Description='Kindly request you to upload all the bills related to your recent business travel.';
+            Tlist.add(T);
+        }
+        insert Tlist;
+        
+        //----------------------------------2nd use case--------------
+        //Create a task for the travel co-ordinator and the manager to insist approve or reject the travel approval
+        
+        Date Dt =Date.Today().addDays(5);
+        Tlist.clear();
+        TAlist.clear();
+        
+        TAlist = [SELECT id, ownerId, Trip_Start_date__c,Trip_End_Date__c,Out_of_State__c from Travel_Approval__c
+                  where (Trip_Start_Date__c = :Dt) AND ( Status__c='Submitted' OR Status__c='Pending' OR Status__c='New')];
+        
+         for(Travel_Approval__c TA : TAlist){
+            Task T1=new Task();
+            Task T2=new Task();
+             
+            T1.whatId=TA.id;
+            T1.ownerId='005dM000000emluQAA';
+            T1.Priority ='High';
+            T1.ActivityDate =TA.Trip_Start_date__c-1;
+            T1.Subject='Action Required';
+            T1.Description='5 Days to go. Kindly Approve or Reject the Travel Approval related to the business travel.';
+            Tlist.add(T1);
+             
+             
+             
+            if(TA.Out_of_State__c==true){
+            T2.whatId=TA.id;
+            T2.ownerId='005dM000000efEBQAY';
+            T2.Priority ='High';
+            T2.ActivityDate =TA.Trip_Start_date__c-1;
+            T2.Subject='Action Required';
+            T2.Description='5 Days to go. Kindly Approve  or Reject the Travel Approval related to the business travel.';
+            Tlist.add(T2);
+           }       
+         }
+        insert Tlist;
+        System.debug(Tlist);
+        Tlist.clear();
+    } 
+}
