@@ -1,0 +1,19 @@
+public class handlerDeptBudgetAlloc {
+    
+    public static void budgetLimit(List<Travel_Approval__c> TAlist){
+        Map<String,Integer> BMap =new  Map<String,Integer>();		// Instantiating the new map called BMap
+        
+        list<Budget__mdt> Blist= [Select id,Department_Id__c,Budget__c from Budget__mdt]; 
+        //Initializing the list with the SOQL type of Custom Metadata Type 
+        
+        for(Budget__mdt B: Blist){		// Put the list values into the map
+           BMap.put(B.Department_Id__c,((Integer)B.Budget__c));
+        }
+        
+        for(Travel_Approval__c TA:TAlist){		// Throw the Exception using addError
+            if(TA.Total_Expenses__c > BMap.get((String)TA.Department__c)){
+             TA.addError('Your Travel Approval Budget is exceeding the limit of your Department Budget.');
+           }
+        }        
+    }
+}
