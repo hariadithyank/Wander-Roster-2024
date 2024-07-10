@@ -1,0 +1,62 @@
+Apex class:
+public with sharing class TreeGridController { 
+    @AuraEnabled(cacheable=true) 
+    public static List<Travel_Approval__c> getTravelApprovals() { 
+        return [SELECT Id, Name, Trip_Start_Date__c, Trip_End_Date__c, Status__c,(SELECT Name,Expense_Type__c,Amount__c FROM Expense_Items__r) FROM Travel_Approval__c WHERE Id IN (SELECT Travel_Approval__c FROM Expense_Item__c) LIMIT 5]; 
+    } 
+} 
+ 
+ 
+.html 
+<template> 
+    <lightning-card title="Travel Approvals with Expense Items"> 
+        <template if:true={travelApprovals}> 
+            <lightning-tree-grid 
+                data={travelApprovals} 
+                columns={columns} 
+                key-field="Id" 
+            ></lightning-tree-grid> 
+        </template> 
+        <template if:false={travelApprovals}> 
+            <p>No data to display.</p> 
+        </template> 
+    </lightning-card> 
+</template> 
+ 
+.js 
+import { LightningElement, wire } from 'lwc'; 
+import getTravelApprovals from '@salesforce/apex/TreeGridController.getTravelApprovals'; 
+  
+const columns = [ 
+            {label:'Travel Approval', fieldName:'Name', type:'Auto Number'},  
+            {label:'Trip Start Date', fieldName:'Trip_Start_Date__c', type:'date'},  
+            {label:'Trip End Date', fieldName:'Trip_End_Date__c', type:'date'},  
+            {label:'Status', fieldName:'Status__c', type:'Picklist'} 
+]; 
+  
+export default class TreeGridComponent extends LightningElement { 
+    travelApprovals; 
+    columns = columns; 
+  
+    @wire(getTravelApprovals) 
+    wiredTravelApprovals({ error, data }) { 
+        if (data) { 
+            this.travelApprovals = data.map(approval => ({ 
+                Id: approval.Id, 
+                Name: approval.Name, 
+                Trip_Start_Date__c: approval.Trip_Start_Date__c, 
+                Trip_End_Date__c: approval.Trip_End_Date__c, 
+                Status__c: approval.Status__c, 
+                _children: approval.Expense_Items__r ? approval.Expense_Items__r.map(item => ({ 
+                    Id: item.Id, 
+                    Name: item.Name, 
+                    Expense_Type__c: item.Expense_Type__c, 
+                    Amount__c: item.Amount__c, 
+                    _children: []   
+                })) : [] 
+            })); 
+        } else if (error) { 
+            console.error('Error fetching travel approvals', error); 
+        } 
+    } 
+} 
