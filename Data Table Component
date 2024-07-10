@@ -1,0 +1,34 @@
+Apex class:
+public with sharing class TravelApprovalController {
+    @AuraEnabled(cacheable=true)
+    public static List<Travel_Approval__c> getTravelApprovals() {
+  
+        Date d = System.today().addDays(10);
+        return [SELECT Id,Name,Trip_Start_Date__c,Trip_End_Date__c,Status__c FROM Travel_Approval__c WHERE Trip_Start_Date__c >= TODAY AND Trip_Start_Date__c <= :d AND Status__c='Approved'];
+    }
+}
+ 
+Html:
+<template>
+     <lightning-card title="TravelApproval">
+    <lightning-datatable
+        key-field="id"
+            data={Approvals.data}
+                columns={columns}>
+    </lightning-datatable>
+     </lightning-card>
+</template>
+ 
+Js:
+import { LightningElement,wire,track} from 'lwc';
+import getTravelApprovals from '@salesforce/apex/TravelApprovalController.getTravelApprovals';
+export default class displayTravelRecord extends LightningElement {
+     @track columns=[{label:'Travel Approval', fieldName:'Name', type:'Auto Number'},
+            {label:'Trip Start Date', fieldName:'Trip_Start_Date__c', type:'date'},
+            {label:'Trip End Date', fieldName:'Trip_End_Date__c', type:'date'},
+            {label:'Status', fieldName:'Status__c', type:'Picklist'}];
+ 
+    @wire(getTravelApprovals)
+    Approvals;
+ 
+}
