@@ -1,0 +1,31 @@
+.html 
+<template>  
+    <lightning-card  title="Wander Roster Partners" icon-name="utility:plane">  
+    <div class="slds-m-around_x-medium">  
+    <div class="slds-button-group" role="group" >  
+    <button name="WanderRoster-min"  onclick={click} class="slds-button slds-button_neutral">Wander</button>  
+    <button name="Hotel-min" onclick={click} class="slds-button slds-button_neutral">Hotel</button>  
+    <button name="Meals-min" onclick={click} class="slds-button slds-button_neutral">Meals</button>  
+    <button name="RentalCar-min" onclick={click} class="slds-button slds-button_neutral">Rental Car</button>  
+    <button name="Travel-min" onclick={click} class="slds-button slds-button_neutral">Travel</button>  
+    </div>   
+    <br>  
+    <img src={images}>  
+    </div>  
+    </lightning-card>  
+</template>  
+ 
+.js 
+import { LightningElement,track } from 'lwc'; 
+import images1 from "@salesforce/resourceUrl/lightningButton";  
+export default class ButtonGroupCmp extends LightningElement {  
+ 
+ 
+  names;  
+  images;  
+  click(event){  
+ 
+ 
+     this.images=`${images1}/${event.target.name}.png`;  
+}  
+} 
