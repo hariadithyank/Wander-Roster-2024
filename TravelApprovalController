@@ -1,0 +1,8 @@
+public with sharing class TravelApprovalController {
+    @AuraEnabled(cacheable=true)
+    public static List<Travel_Approval__c> getTravelApprovals() {
+  
+        Date d = System.today().addDays(10);
+        return [SELECT Id,Name,Trip_Start_Date__c,Trip_End_Date__c,Status__c FROM Travel_Approval__c WHERE Trip_Start_Date__c >= TODAY AND Trip_Start_Date__c <= :d AND Status__c='Approved'];
+    }
+}
