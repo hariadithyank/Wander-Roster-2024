@@ -1,0 +1,46 @@
+public class handlerScheduleEmailReminder implements Database.Batchable<sObject> {
+    
+    List<Travel_Approval__c> TAlist =new List<Travel_Approval__c>();
+    
+    public handlerScheduleEmailReminder(List<Travel_Approval__c> TAlist){
+        this.TAlist=TAlist;
+    }
+    
+    public list<Travel_Approval__c> start(Database.BatchableContext BC) {
+        return TAlist;
+    }
+
+    public void execute(Database.BatchableContext BC, List<Travel_Approval__c> TAlist1) {
+        
+        // Create a list to hold the emails
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+
+        // Loop through the records and create emails
+        for(Travel_Approval__c ta : TAlist1) {
+            
+            // Create a new email
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+
+            // Set the recipient as the submitter
+            email.setToAddresses(new String[] {ta.Owner.Email});
+
+            // Set the email subject and body
+            email.setSubject('Travel Reminder for '+ta.name );
+            email.setPlainTextBody('This is a reminder for '+ta.name+'.\nYour travel start date is '+ta.Trip_Start_Date__c+'\nGet Ready for your travel.\n\n. Happy Journey...');
+
+            // Add the email to the list
+            emails.add(email);
+        }
+
+        // Send the emails in bulk
+        if(!emails.isEmpty()) {
+            Messaging.sendEmail(emails);
+        }
+    }
+
+    public void finish(Database.BatchableContext BC) {
+        // This method is called after all batches are processed.
+        // You can put any post-processing code here.
+        System.debug('Email Sent Successfully...');
+    }
+}
