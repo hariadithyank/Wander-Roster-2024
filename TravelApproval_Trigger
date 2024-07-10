@@ -1,0 +1,8 @@
+trigger TravelApproval_Trigger on Travel_Approval__c (Before insert, Before Update) {
+    
+    handlerDeptBudgetAlloc.budgetLimit(trigger.new);
+    
+    if(handlerTravalApproval.startEndDate(trigger.new[0])){
+     handlerTravalApproval.dateRange(trigger.new[0]);
+    }   
+}
