@@ -1,0 +1,222 @@
+@isTest
+public class testClassTravelApproval {
+    @testSetup
+    public static void testData(){
+        Travel_Approval__c TA=new Travel_Approval__c();    // To Duplicate Trigger Test
+        TA.Purpose_of_Trip__c='Test';
+        TA.Trip_Start_Date__c=Date.newInstance(2024, 08, 03);
+        TA.Trip_End_Date__c=Date.newInstance(2024, 08, 18);
+        TA.Department__c='a00dM000002TMIaQAO';
+        TA.State__c='AS - Assam';
+        insert(TA);
+        
+        Travel_Approval__c TA1=new Travel_Approval__c();    // To Duplicate Trigger Test
+        TA1.Purpose_of_Trip__c='Test';
+        TA1.Trip_Start_Date__c=Date.newInstance(2024, 10, 04);
+        TA1.Trip_End_Date__c=Date.newInstance(2024, 10, 25);
+        insert(TA1);
+        
+        
+        User u1=new User();							//To Shedule Reminder Test
+        u1.lastname='Test User';
+        u1.Username='testuser@wanderroster.com';
+        u1.Alias='testtest';
+        u1.Email='salesforce3838@gmail.com';
+        u1.ProfileId = UserInfo.getProfileId();
+        u1.TimeZoneSidKey = 'America/Los_Angeles';
+        u1.LocaleSidKey = 'en_US';
+        u1.LanguageLocaleKey = 'en_US';
+        u1.EmailEncodingKey = 'UTF-8';  
+        insert u1;
+                
+        Date tom = Date.Today()+1;
+        Date nextDate = Date.Today().addDays(+7);
+        Travel_Approval__c TA2=new Travel_Approval__c();  
+        TA2.Purpose_of_Trip__c='Test';
+        TA2.OwnerId=u1.id;
+        TA2.Trip_Start_Date__c=tom;
+        TA2.Trip_End_Date__c=nextDate;
+        insert(TA2);
+        
+        
+        Date startDate = Date.Today().addDays(-745);   // To Big Object
+        Date endDate = Date.Today().addDays(-735);
+        Travel_Approval__c TA3=new Travel_Approval__c();    
+        TA3.Purpose_of_Trip__c='Test';
+        TA3.OwnerId=u1.id;
+        TA3.Trip_Start_Date__c=startDate;
+        TA3.Trip_End_Date__c=endDate;
+        insert(TA3);
+        
+        Expense_Item__c EI =new Expense_Item__c();
+        EI.Travel_Approval__c=TA3.id;
+        EI.Expense_Type__c='Airfare';
+        EI.Amount__c=10000; 
+        insert(EI);
+        
+        
+        Date startDate1 = Date.Today().addDays(-7);				 // To Insert 
+        Date endDate1 = Date.Today().addDays(-1);
+        Travel_Approval__c TA4=new Travel_Approval__c();   
+        TA4.Purpose_of_Trip__c='Test';
+        TA4.OwnerId=u1.id;
+        TA4.Trip_Start_Date__c=startDate1;
+        TA4.Trip_End_Date__c=endDate1;
+        insert(TA4);
+        
+        User u2=new User();							// To Task Creation Approver Test
+        u2.lastname='Test User';
+        u2.Username='testuser1@wanderroster.com';
+        u2.Alias='testuser';
+        u2.Email='salesforce3838@gmail.com';
+        u2.ProfileId = UserInfo.getProfileId();
+        u2.TimeZoneSidKey = 'America/Los_Angeles';
+        u2.LocaleSidKey = 'en_US';
+        u2.LanguageLocaleKey = 'en_US';
+        u2.EmailEncodingKey = 'UTF-8';  
+        insert u2;
+        
+        
+        Date startDate2 = Date.Today().addDays(5);
+        Date endDate2 = Date.Today().addDays(10);
+        Travel_Approval__c TA5=new Travel_Approval__c();    // To Approver
+        TA5.Purpose_of_Trip__c='Test';
+        TA5.OwnerId=u2.id;
+        TA5.Trip_Start_Date__c=startDate2;
+        TA5.Trip_End_Date__c=endDate2;
+        insert(TA5);  
+        
+        User u3=new User();							// To Task Creation for Employee Test
+        u3.lastname='Test User';
+        u3.Username='testuser2@wanderroster.com';
+        u3.Alias='tuser';
+        u3.Email='salesforce3838@gmail.com';
+        u3.ProfileId = UserInfo.getProfileId();
+        u3.TimeZoneSidKey = 'America/Los_Angeles';
+        u3.LocaleSidKey = 'en_US';
+        u3.LanguageLocaleKey = 'en_US';
+        u3.EmailEncodingKey = 'UTF-8';  
+        insert u3;
+        
+        Date startDate3 = Date.Today().addDays(5);
+        Date endDate3 = Date.Today();
+        Travel_Approval__c TA6=new Travel_Approval__c();    // To Employee
+        TA6.Purpose_of_Trip__c='Test';
+        TA6.OwnerId=u3.id;
+        TA6.Trip_Start_Date__c=startDate3;
+        TA6.Trip_End_Date__c=endDate3;
+        TA6.Status__c='Approved';
+        insert(TA6);  
+    
+    }
+    
+    
+    @isTest
+    public static void lwc(){
+        Date d = System.today().addDays(10);
+        
+        list<Travel_Approval__c> TAlist = TravelApprovalController.getTravelApprovals();
+        
+        list<Travel_Approval__c> TA1list = [SELECT Id,Name,Trip_Start_Date__c,Trip_End_Date__c,Status__c FROM Travel_Approval__c WHERE Trip_Start_Date__c >= TODAY AND Trip_Start_Date__c <= :d AND Status__c='Approved'];
+        
+        System.AssertEquals(TAlist,TA1list);
+        
+    }
+    
+     @isTest
+    public static void tasks(){
+        Test.startTest();
+        String cron='0 0 1 * * ?';
+        id jobId = System.schedule('Schedule Archieval',cron,new actualExpenseAttachment());
+        Test.stopTest();
+        
+        System.AssertNotEquals(null,jobId);
+    }
+    
+    
+    
+    @isTest
+    public static void bigObj(){
+        
+        Test.startTest();
+        String cron='0 0 1 * * ?';
+        id jobId = System.schedule('Schedule Archieval',cron,new scheduleArchievalTA());
+        Test.stopTest();
+        
+        System.AssertNotEquals(null,jobId);
+    }  
+    
+    @isTest
+    public static void emailReminder(){
+        Test.startTest();
+        String cron='0 0 1 * * ?';
+        id jobId = System.schedule('Test Email Reminder',cron,new scheduleEmailReminder());
+        Test.stopTest();
+        System.AssertNotEquals(null,jobId);
+    }
+    
+    @isTest
+    public static void deptBudget(){
+         Date dt=Date.newInstance(2024, 08, 03);
+         Travel_Approval__c TA =[select id,Purpose_of_Trip__c,Trip_Start_Date__c,Trip_End_Date__c
+                               from Travel_Approval__c where Trip_Start_Date__c=:dt limit 1];
+        
+        Expense_item__c EI =new Expense_Item__c();
+        EI.Travel_Approval__c=TA.id;
+        EI.Expense_Type__c='Airfare';
+        EI.Amount__c=55000;
+        
+        Database.saveResult err1 = Database.insert(EI,false);
+        System.Assertequals('Your Travel Approval Budget is exceeding the limit of your Department Budget.',err1.getErrors()[0].getMessage());
+    }
+    
+    @isTest
+    public static void startEndDateInsert(){
+                
+        Travel_Approval__c TA1=new Travel_Approval__c();   // To Insert Test
+        TA1.Purpose_of_Trip__c='Test';
+        TA1.Trip_Start_Date__c=Date.newInstance(2024, 08, 03 );
+        TA1.Trip_End_Date__c=Date.newInstance(2024, 08, 08);
+        Database.saveResult err1 = Database.insert(TA1,false);
+        System.Assertequals('Employee can\'t have more than one travel at one day',err1.getErrors()[0].getMessage());
+    }
+    @isTest
+    public static void startEndDateUpdate(){		// Update Test
+          Date dt=Date.newInstance(2024, 08, 03);
+         Travel_Approval__c TA =[select id,Purpose_of_Trip__c,Trip_Start_Date__c,Trip_End_Date__c
+                               from Travel_Approval__c where Trip_Start_Date__c=:dt  limit 1];
+        
+        Travel_Approval__c TA11=new Travel_Approval__c(id=TA.id);  
+        TA11.Purpose_of_Trip__c='Test';
+        TA11.Trip_Start_Date__c=Date.newInstance(2024, 10, 04);
+        TA11.Trip_End_Date__c=Date.newInstance(2024, 10, 25);
+         Database.saveResult err11 = Database.update(TA11,false);
+        
+        System.Assertequals('Employee can\'t have more than one travel at one day',err11.getErrors()[0].getMessage());
+      }
+        @isTest
+        public static void dateRangeInsert(){   // Insert Test
+ 
+        Travel_Approval__c TA2=new Travel_Approval__c();
+        TA2.Purpose_of_Trip__c='Test';
+        TA2.Trip_Start_Date__c=Date.newInstance(2024, 08, 05);
+        TA2.Trip_End_Date__c=Date.newInstance(2024, 08, 06);
+        Database.saveResult err2 = Database.insert(TA2,false);
+        System.Assertequals('Employee is already having active travel',err2.getErrors()[0].getMessage());
+
+        }
+    
+       @isTest
+       public static void dateRangeUpdate(){     		//Update Test
+        Date dt=Date.newInstance(2024, 08, 03);
+        Travel_Approval__c TA =[select id,Purpose_of_Trip__c,Trip_Start_Date__c,Trip_End_Date__c
+                                      from Travel_Approval__c where Trip_Start_Date__c=:dt  limit 1];
+    
+        Travel_Approval__c TA22=new Travel_Approval__c(id=TA.id);
+        TA22.Purpose_of_Trip__c='Test';
+        TA22.Trip_Start_Date__c=Date.newInstance(2024, 10, 07);
+        TA22.Trip_End_Date__c=Date.newInstance(2024, 10, 18);
+         Database.saveResult err22 = Database.update(TA22,false);
+        System.Assertequals('Employee is already having active travel',err22.getErrors()[0].getMessage());  
+        }
+ }
