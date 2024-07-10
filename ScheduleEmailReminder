@@ -1,0 +1,11 @@
+public class ScheduleEmailReminder implements Schedulable{
+    public void execute(SchedulableContext SC) {
+        list<Travel_Approval__c> TAlist = [SELECT Id, Owner.Email,Name, Trip_Start_Date__c
+                                           FROM Travel_Approval__c WHERE Trip_Start_Date__c =Tomorrow]; 
+        if(!TAlist.isEmpty()){
+            
+        Id batchJobId = Database.executeBatch(new handlerScheduleEmailReminder(TAlist),1000);
+        
+        }
+    }
+}
