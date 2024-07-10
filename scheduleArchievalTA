@@ -1,0 +1,5 @@
+public class scheduleArchievalTA implements schedulable {
+    public void execute(SchedulableContext sc){
+            Id jobid=Database.executeBatch(new batchArchievalTA(),1000);    
+    }
+}
