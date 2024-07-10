@@ -1,0 +1,45 @@
+.html 
+<template>  
+        <div class="slds-box slds-box_x-small slds-text-align_center slds-m-around_x-small">Wander Roster 
+            <lightning-carousel>  
+                <lightning-carousel-image  
+                    src = {WanderRoster}  
+                    header = "Wander Roster"  
+                    description = "To Travel is to live"  
+                    alttext = "Wander Roster Travel"  
+                    href = "javascript:void(0);">  
+                </lightning-carousel-image>  
+                <lightning-carousel-image  
+                    src = {TravelApproval}  
+                    header = "Travel Approval"  
+                    description = "Travel Approval in the Application."  
+                    alttext = "Wander Roster Travel Approval"  
+                    href = "javascript:void(0);">  
+                </lightning-carousel-image>  
+                <lightning-carousel-image  
+                    src = {TravelPlaces}  
+                    header = "Travel Places"  
+                    description = "Travel and Get a Worthy Experience."  
+                    alttext = "Get your Destination"  
+                    href = "javascript:void(0);">  
+                </lightning-carousel-image>  
+                <lightning-carousel-image  
+                    src = {SafeJourney}  
+                    header = "Safe Journey!"  
+                    description = "After the Approval Resquest and then make a safe journey"  
+                    alternative-text = "Wander Roster Travel Approval and have the Safe Jounery!"  
+                    href = "javascript:void(0);">  
+                </lightning-carousel-image>  
+            </lightning-carousel>  
+    </div>  
+</template> 
+ 
+.js 
+import { LightningElement } from 'lwc';  
+import LWC_RESOURCE from "@salesforce/resourceUrl/CarouselImage";    
+export default class CarouselCmp extends LightningElement {  
+    WanderRoster = `${LWC_RESOURCE}/gencraft_image_1720202370200-1-min.png`;  
+    TravelApproval = `${LWC_RESOURCE}/gencraft_image_1719898273776-1-min.png`;  
+    TravelPlaces = `${LWC_RESOURCE}/gencraft_image_1719898041294-1-min.png`;  
+    SafeJourney = `${LWC_RESOURCE}/gencraft_image_1719898008557-1-min.png`;  
+} 
